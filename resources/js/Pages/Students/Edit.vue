@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, useForm, usePage } from '@inertiajs/vue3';
-import { watch, ref } from 'vue';
+import { Head, useForm, usePage, Link } from '@inertiajs/vue3';
+import { watch, ref, onMounted } from 'vue';
 import InputError from '@/Components/InputError.vue';
 
 defineProps({
@@ -16,20 +16,24 @@ defineProps({
 });
 
 let sections = ref({});
-let student = usePage().props.student;
+let student = usePage().props.student.data;
 
 const form = useForm({
     name: student.name,
     email: student.email,
-    class_id: student.class_id,
-    section_id: usePage().props.student.section_id,
+    class_id: student.class.id,
+    section_id: student.section.id,
 });
 
 watch(
     () => form.class_id,
     (newValue) => {
         getSections(newValue);
-    });
+});
+
+onMounted(() => {
+    getSections(form.class_id);
+});
 
 const getSections = (classId) => {
     axios.get('/api/sections?class_id=' + classId).then((response) => {

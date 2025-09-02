@@ -1,7 +1,8 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Pagination from '@/Components/Pagination.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/vue3';
+import { ref, computed, watch } from 'vue';
 
 defineProps({
     students: {
@@ -9,6 +10,47 @@ defineProps({
         required: true,
     },
 });
+
+let search = ref(usePage().props.search), pageNumber = ref(1);
+
+let studentUrl = computed(() => {
+    let url = new URL(route('students.index'));
+    url.searchParams.append('page', pageNumber.value);
+    if (search.value) {
+        url.searchParams.append('search', search.value);
+    }
+    return url;
+});
+
+const updatedPageNumber = (link) => {
+    pageNumber.value = link.url.split('=')[1];
+};
+
+watch( () => studentUrl.value,
+    (updatedStudentUrl) => {
+        router.visit(updatedStudentUrl, {
+            preserveScroll: true,
+            preserveState: true,
+            replace: true,
+        });
+    }
+);
+
+watch( () => search.value,
+    (value) => {
+        if(value) {
+            pageNumber.value = 1;
+        }
+    }
+);
+
+const deleteForm = useForm({});
+
+const deleteStudent = (studentId) => {
+    if (confirm('Are you sure you want to delete this student?')) {
+        deleteForm.delete(route('students.destroy', studentId));
+    }
+};
 </script>
 
 <template>
@@ -27,7 +69,7 @@ defineProps({
             <!-- 검색은 왼쪽 추가 버튼은 오른쪽 -->
             <div class="flex justify-between items-center">
                 <div class="mb-6">
-                    <input type="text" class="border border-gray-300 rounded-md p-2" placeholder="Search">
+                    <input v-model="search" type="text" class="border border-gray-300 rounded-md p-2" placeholder="Search">
                 </div>
                 <div class="mb-6">
                     <Link :href="route('students.create')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Create Student</Link>
@@ -56,12 +98,12 @@ defineProps({
                         <td class="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900 border-b border-gray-300">{{ student.created_at }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900 border-b border-gray-300">
                             <Link :href="route('students.edit', student.id)" class="text-indigo-600 hover:text-indigo-900">Edit</Link>
-                            <button class="text-red-600 hover:text-red-900">Delete</button>
+                            <Link @click="deleteStudent(student.id)" class="text-red-600 hover:text-red-900">Delete</Link>
                         </td>
                     </tr>
                 </tbody>
             </table>
-            <Pagination :data="students" />
+            <Pagination :data="students" :updatedPageNumber="updatedPageNumber" />
         </div>
     </AuthenticatedLayout>
 </template>
