@@ -11,8 +11,7 @@ class SectionController extends Controller
 {
     public function __invoke(ListSectionsRequest $request)
     {
-        $classId = $request->validated()['class_id'];
-        $sections = Section::where('class_id', $classId)->get();
+        $sections = Section::where('class_id', $request->class_id)->get();
         return SectionResource::collection($sections);
     }
 }

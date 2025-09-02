@@ -2,13 +2,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { watch, ref } from 'vue';
+import InputError from '@/Components/InputError.vue';
 
 defineProps({
     classes: {
-        type: Object,
-        required: true,
-    },
-    sections: {
         type: Object,
         required: true,
     },
@@ -27,12 +24,16 @@ watch(
     () => form.class_id,
     (newValue) => {
         getSections(newValue);
-});
+    });
 
 const getSections = (classId) => {
     axios.get('/api/sections?class_id=' + classId).then((response) => {
         sections.value = response.data;
     });
+};
+
+const createStudent = () => {
+    form.post(route('students.store'));
 };
 </script>
 
@@ -42,50 +43,69 @@ const getSections = (classId) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Create Student
             </h2>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <form>
-                            <div>
-                                <label>Name</label>
-                                <input v-model="form.name" type="text" id="name"></input>
-                                <p class="mt-1 text-sm text-red-500">{{ form.errors.name }}</p>
+        <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <div class="lg:grid lg:grid-cols-12 lg:gap-x-5">
+                <div class="space-y-6 sm:px-6 lg:px-0 lg:col-span-12">
+                    <form @submit.prevent="createStudent">
+                        <div class="shadow sm:rounded-md sm:overflow-hidden">
+                            <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
+                                <div>
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900">Student Information</h3>
+                                    <p class="mt-1 text-sm text-gray-500">
+                                        Use this form to create a new student.
+                                    </p>
+                                </div>
+                                <div class="grid grid-cols-6 gap-x-6 gap-y-6">
+                                    <div class="col-span-6 sm:col-span-3">
+                                        <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                                        <input v-model="form.name" type="text" id="name"
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                            :class="{ 'test-red-900 focus:ring-red-500 focus:border-red-500 border-red-300': form.errors.name }" />
+                                        <InputError :message="form.errors.name" class="mt-2" />
+                                    </div>
+                                    <div class="col-span-6 sm:col-span-3">
+                                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                                        <input v-model="form.email" type="email" id="email" autocomplete="email"
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                            :class="{ 'test-red-900 focus:ring-red-500 focus:border-red-500 border-red-300': form.errors.email }" />
+                                        <InputError :message="form.errors.email" class="mt-2" />
+                                    </div>
+                                    <div class="col-span-6 sm:col-span-3">
+                                        <label for="class_id" class="block text-sm font-medium text-gray-700">Class</label>
+                                        <select v-model="form.class_id" id="class_id"
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                            :class="{ 'test-red-900 focus:ring-red-500 focus:border-red-500 border-red-300': form.errors.class_id }">
+                                            <option value=""> select a class</option>
+                                            <option v-for="item in classes.data" :key="item.id" :value="item.id">{{ item.name }}
+                                            </option>
+                                        </select>
+                                        <InputError :message="form.errors.class_id" class="mt-2" />
+                                    </div>
+                                    <div class="col-span-6 sm:col-span-3">
+                                        <label for="section_id" class="block text-sm font-medium text-gray-700">Section</label>
+                                        <select v-model="form.section_id" id="section_id"
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                            :class="{ 'test-red-900 focus:ring-red-500 focus:border-red-500 border-red-300': form.errors.section_id }">
+                                            <option value=""> select a section</option>
+                                            <option v-for="section in sections.data" :key="section.id" :value="section.id">{{
+                                                section.name
+                                                }}
+                                            </option>
+                                        </select>
+                                        <InputError :message="form.errors.section_id" class="mt-2" />
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label>Email</label>
-                                <input v-model="form.email" type="email" id="email" autocomplete="email"></input>
-                                <p class="mt-1 text-sm text-red-500">{{ form.errors.email }}</p>
-                            </div>
-                            <div>
-                                <label>Class</label>
-                                <select v-model="form.class_id" id="class_id">
-                                    <option value=""> select a class</option>
-                                    <option v-for="item in classes.data" :key="item.id" :value="item.id">{{ item.name }}
-                                    </option>
-                                </select>
-                                <p>error</p>
-                            </div>
-                            <div>
-                                <label>Section</label>
-                                <select v-model="form.section_id" id="section_id">
-                                    <option value=""> select a section</option>
-                                    <option v-for="section in sections.data" :key="section.id" :value="section.id">{{ section.name
-                                        }}
-                                    </option>
-                                </select>
-                                <p>error</p>
-                            </div>
-                        </form>
-                        <div>
-                            <button>Create</button>
-                            <button>Cancel</button>
                         </div>
+                    </form>
+                    <div class="mt-6 flex items-center justify-end gap-x-6">
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Create</button>
+                        <button class="bg-white hover:bg-gray-100 text-gray-800 font-bold py-2 px-4 rounded border border-gray-400">Cancel</button>
                     </div>
                 </div>
             </div>

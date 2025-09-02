@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\ClassesResource;
 use App\Http\Resources\SectionResource;
 use App\Http\Resources\StudentResource;
+use App\Http\Requests\StoreStudentRequest;
 
 class StudentController extends Controller
 {
@@ -24,7 +25,16 @@ class StudentController extends Controller
     public function create()
     {
         $classes = ClassesResource::collection(Classes::all());
-        $sections = SectionResource::collection(Section::all());
-        return inertia('Students/Create', ['classes' => $classes, 'sections' => $sections]);
+
+        return inertia('Students/Create', [
+            'classes' => $classes
+        ]);
+    }
+
+    public function store(StoreStudentRequest $request)
+    {
+        Student::create($request->validated());
+
+        return redirect()->route('students.index');
     }
 }
