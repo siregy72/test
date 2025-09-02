@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { watch, ref } from 'vue';
 import InputError from '@/Components/InputError.vue';
 
@@ -9,15 +9,20 @@ defineProps({
         type: Object,
         required: true,
     },
+    student: {
+        type: Object,
+        required: true,
+    },
 });
 
 let sections = ref({});
+let student = usePage().props.student;
 
 const form = useForm({
-    name: '',
-    email: '',
-    class_id: '',
-    section_id: '',
+    name: student.name,
+    email: student.email,
+    class_id: student.class_id,
+    section_id: usePage().props.student.section_id,
 });
 
 watch(
@@ -32,32 +37,32 @@ const getSections = (classId) => {
     });
 };
 
-const createStudent = () => {
-    form.post(route('students.store'));
+const updateStudent = () => {
+    form.put(route('students.update', student.id));
 };
 </script>
 
 <template>
 
-    <Head title="Create Student" />
+    <Head title="Update Student" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Create Student
+                Update Student
             </h2>
         </template>
 
         <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
             <div class="lg:grid lg:grid-cols-12 lg:gap-x-5">
                 <div class="space-y-6 sm:px-6 lg:px-0 lg:col-span-12">
-                    <form @submit.prevent="createStudent">
+                    <form @submit.prevent="updateStudent">
                         <div class="shadow sm:rounded-md sm:overflow-hidden">
                             <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
                                 <div>
                                     <h3 class="text-lg leading-6 font-medium text-gray-900">Student Information</h3>
                                     <p class="mt-1 text-sm text-gray-500">
-                                        Use this form to create a new student.
+                                        Use this form to update the student.
                                     </p>
                                 </div>
                                 <div class="grid grid-cols-6 gap-x-6 gap-y-6">
@@ -108,7 +113,7 @@ const createStudent = () => {
                         </div>
                         <div class="mt-6 flex items-center justify-end gap-x-6">
                             <button type="submit"
-                                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Create</button>
+                                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Update</button>
                             <button
                                 class="bg-white hover:bg-gray-100 text-gray-800 font-bold py-2 px-4 rounded border border-gray-400">Cancel</button>
                         </div>

@@ -55,7 +55,7 @@ defineProps({
                         <td class="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900 border-b border-gray-300">{{ student.section.name }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900 border-b border-gray-300">{{ student.created_at }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900 border-b border-gray-300">
-                            <button class="text-indigo-600 hover:text-indigo-900">Edit</button>
+                            <Link :href="route('students.edit', student.id)" class="text-indigo-600 hover:text-indigo-900">Edit</Link>
                             <button class="text-red-600 hover:text-red-900">Delete</button>
                         </td>
                     </tr>
